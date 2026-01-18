@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fortune Swipe</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont;
+        }
+
+        #app {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            text-align: center;
+            transition: background 0.5s ease;
+            background: linear-gradient(135deg, #0f5739, #3d8e66);
+        }
+
+        #fortune-text {
+            font-size: 22px;
+            line-height: 1.4;
+            color: white;
+            max-width: 480px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .hint {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <div id="fortune-text">Yukarı kaydırarak bir soru keşfet</div>
+        <div class="hint">↑ Kaydır</div>
+    </div>
+
+    <script>
+        /* ---------- ELEMENT ---------- */
+        const app = document.getElementById("app");
+        const textEl = document.getElementById("fortune-text");
+
+        /* ---------- DATA ---------- */
+        const fortunes = [
+            { text: "Anlaşılmak mı, sevilmek mi senin için daha önemli?" },
+            { text: "Bir ilişkide en çok ne seni uzaklaştırır?" },
+            { text: "Kendinle en çok hangi konuda çelişiyorsun?" },
+            { text: "Seni en çok ne yordu ama bırakmadın?" },
+            { text: "Bir duygudan kaçmak mı, onunla kalmak mı daha zor?" },
+            { text: "Gece en çok hangi düşünceyle yalnız kalırsın?" },
+            { text: "Sevildiğini en çok ne zaman hissedersin?" },
+            { text: "Kendine en sert davrandığın konu ne?" },
+            { text: "Gece en çok hangi düşünceyle yalnız kalırsın?", category: "night" },
+            { text: "Uyumadan önce aklına ilk ne gelir?", category: "night" },
+            { text: "Kimsenin bilmediği bir düşüncen var mı?", category: "night" },
+            { text: "Gece daha dürüst olur musun?", category: "night" },
+            { text: "Karanlık sana ne hissettirir?", category: "night" },
+            { text: "En çok hangi “ya şöyle olsaydı” aklını kurcalar?", category: "night" },
+            { text: "Gece kendine ne sorarsın?", category: "night" },
+            { text: "Susturduğun bir düşünce var mı?", category: "night" },
+            { text: "Gece geçmiş mi daha ağır gelir, gelecek mi?", category: "night" },
+            { text: "En çok hangi anı geceleri ortaya çıkar?", category: "night" },
+            { text: "Korkuların gece değişir mi?", category: "night" },
+            { text: "Gece seni rahatlatan şey ne?", category: "night" },
+            { text: "En çok neyi düşünmemek için uyursun?", category: "night" },
+            { text: "Sessizlik sana ne söyler?", category: "night" },
+            { text: "Geceleri daha cesur musun?", category: "night" },
+            { text: "Uykudan önce en çok kimi hatırlarsın?", category: "night" },
+            { text: "Gece seni ayakta tutan duygu ne?", category: "night" },
+            { text: "Kendinle baş başa kalmak seni korkutur mu?", category: "night" },
+            { text: "Gece verilen kararlar doğru olur mu?", category: "night" },
+            { text: "Gecenin sana öğrettiği bir şey var mı?", category: "night" },
+            { text: "Bir duygudan kaçmak mı, onunla kalmak mı daha zor?", category: "emotions" },
+            { text: "Seni en çok yoran duygu hangisi?", category: "emotions" },
+            { text: "Bir duyguyu bastırdığında ne olur?", category: "emotions" },
+            { text: "Ağlamak senin için ne ifade ediyor?", category: "emotions" },
+            { text: "En son ne zaman gerçekten rahatladın?", category: "emotions" },
+            { text: "Kızgınlığını nasıl yaşarsın?", category: "emotions" },
+            { text: "Üzüntünü paylaşmak mı zor, saklamak mı?", category: "emotions" },
+            { text: "Hangi duygunu daha iyi anlamak isterdin?", category: "emotions" },
+            { text: "Mutluluk senin için anlık mı, kalıcı mı?", category: "emotions" },
+            { text: "Bir duyguyu kabul etmek ne zaman zorlaşır?", category: "emotions" },
+            { text: "Seni en hızlı sakinleştiren şey ne?", category: "emotions" },
+            { text: "Duygularını kelimelere dökmek kolay mı?", category: "emotions" },
+            { text: "En çok hangi duygudan korkuyorsun?", category: "emotions" },
+            { text: "Bir duygunun geçmesi için neye ihtiyacın var?", category: "emotions" },
+            { text: "Hissettiğin ama adını koyamadığın bir duygu var mı?", category: "emotions" },
+            { text: "Duyguların seni mi yönetiyor, sen mi onları?", category: "emotions" },
+            { text: "Hangi duygunu daha çok bastırıyorsun?", category: "emotions" },
+            { text: "Duygusal olarak en yalnız ne zaman hissedersin?", category: "emotions" },
+            { text: "Bir duyguyu paylaşınca hafifler misin?", category: "emotions" },
+            { text: "Duyguların sana ne anlatmaya çalışıyor olabilir?", category: "emotions" },
+            { text: "Kendinle en çok hangi konuda çelişiyorsun?", category: "self" },
+            { text: "Hangi yönünü başkalarından saklıyorsun?", category: "self" },
+            { text: "Kendinle en son ne zaman gurur duydun?", category: "self" },
+            { text: "Değiştirmek isteyip de değiştiremediğin şey ne?", category: "self" },
+            { text: "Kendini en çok ne tetikler?", category: "self" },
+            { text: "Hangi alışkanlığın seni geride tutuyor?", category: "self" },
+            { text: "Kendin hakkında en çok neyi sorguluyorsun?", category: "self" },
+            { text: "Başkalarına gösterdiğin sen ile gerçek sen ne kadar aynı?", category: "self" },
+            { text: "En çok hangi anlarda kendin oluyorsun?", category: "self" },
+            { text: "Kendine en sert davrandığın konu ne?", category: "self" },
+            { text: "Hayatında en çok neyi erteliyorsun?", category: "self" },
+            { text: "Kendi sesini en çok ne zaman bastırıyorsun?", category: "self" },
+            { text: "Seni sen yapan en güçlü özellik ne?", category: "self" },
+            { text: "Kendinle barışmak senin için ne demek?", category: "self" },
+            { text: "En çok hangi halini seviyorsun?", category: "self" },
+            { text: "Kendini tek kelimeyle tanımlasan ne olurdu?", category: "self" },
+            { text: "Hangi konuda kendine daha dürüst olmalısın?", category: "self" },
+            { text: "Kendi sınırlarını ne kadar biliyorsun?", category: "self" },
+            { text: "Bugünkü sen, geçmişteki seni şaşırtır mıydı?", category: "self" },
+            { text: "Seni en çok ne yordu ama bırakmadın?", category: "self" },
+            { text: "Anlaşılmak mı, sevilmek mi senin için daha önemli?", category: "relationships" },
+            { text: "Bir ilişkide en çok ne seni uzaklaştırır?", category: "relationships" },
+            { text: "Sevildiğini en çok ne zaman hissedersin?", category: "relationships" },
+            { text: "Birine kendin olmayı ne zaman bırakırsın?", category: "relationships" },
+            { text: "Affetmek mi zor, unutmak mı?", category: "relationships" },
+            { text: "Bir ilişkide susmak mı daha kırıcı, konuşmak mı?", category: "relationships" },
+            { text: "Sevgi sence çaba ister mi, yoksa kendiliğinden mi olur?", category: "relationships" },
+            { text: "Birine bağlı kalmanı sağlayan şey nedir?", category: "relationships" },
+            { text: "Gitmen gereken bir ilişkide neden kalırsın?", category: "relationships" },
+            { text: "Bir ilişkide en çok neyden korkarsın?", category: "relationships" },
+            { text: "Sevilmek için kendinden ödün verdin mi?", category: "relationships" },
+            { text: "Birinin seni gerçekten anladığını nasıl anlarsın?", category: "relationships" },
+            { text: "İlişkilerinde tekrar eden bir döngü var mı?", category: "relationships" },
+            { text: "Güven senin için nasıl oluşur?", category: "relationships" },
+            { text: "Sevdiğin birine en çok neyi söyleyemedin?", category: "relationships" },
+            { text: "Bir ilişkide “ben” mi daha önemli, “biz” mi?", category: "relationships" },
+            { text: "Birini bırakmak mı daha zor, kalmak mı?", category: "relationships" },
+            { text: "Sevgi sence zamanla mı artar, azalır mı?", category: "relationships" },
+            { text: "Bir ilişkide kendini en çok ne yorar?", category: "relationships" },
+            { text: "Sevgi mi daha kırılgandır, insanlar mı?", category: "relationships" },
+            { text: "Duyguların sana ne anlatmaya çalışıyor olabilir?" }
+        ];
+
+        const COLORS = [
+            "#0f5739",
+            "#3d8e66",
+            "#45c9a4",
+            "#46b5a9",
+            "#52c9eb",
+            "#054c76",
+            "#0c192a",
+            "#471c3a",
+            "#d2cdc6",
+            "#08a693",
+            "#3a4d5f",
+            "#272c3f",
+            "#731212",
+            "#8a0303"
+        ];
+
+        /* ---------- STATE ---------- */
+        const shownFortunes = new Set();
+        let lastColorIndex = -1;
+
+        /* ---------- CORE ---------- */
+        function showFortune() {
+            if (shownFortunes.size === fortunes.length) {
+                textEl.innerText = "Tüm sorular gösterildi. Sayfayı yenileyin.";
+                return;
+            }
+
+            let i;
+            do {
+                i = Math.floor(Math.random() * fortunes.length);
+            } while (shownFortunes.has(i));
+
+            shownFortunes.add(i);
+
+            textEl.style.opacity = 0;
+            textEl.style.transform = "translateY(-20px)";
+
+            setTimeout(() => {
+                textEl.innerText = fortunes[i].text;
+                changeBackgroundColor();
+                textEl.style.opacity = 1;
+                textEl.style.transform = "translateY(0)";
+            }, 250);
+        }
+
+        function changeBackgroundColor() {
+            app.style.background = `linear-gradient(135deg,
+        ${COLORS[(lastColorIndex = (lastColorIndex + 1 + Math.floor(Math.random() * (COLORS.length - 1))) % COLORS.length)]},
+        ${COLORS[(lastColorIndex = (lastColorIndex + 1 + Math.floor(Math.random() * (COLORS.length - 1))) % COLORS.length)]}
+      )`;
+        }
+
+        /* ---------- SWIPE ---------- */
+        let startY = 0;
+        const SWIPE_THRESHOLD = 80;
+
+        document.addEventListener("touchstart", e => {
+            startY = e.touches[0].clientY;
+        });
+
+        document.addEventListener("touchend", e => {
+            const endY = e.changedTouches[0].clientY;
+            if (startY - endY > SWIPE_THRESHOLD) {
+                showFortune();
+            }
+        });
+
+        /* ---------- CLICK (DESKTOP) ---------- */
+        document.addEventListener("click", showFortune);
+    </script>
+
+    <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("service-worker.js")
+    .then(() => console.log("PWA aktif"))
+    .catch(err => console.log("Hata:", err));
+}
+</script>
+
+
+</body>
+
+</html>
