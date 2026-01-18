@@ -1,6 +1,6 @@
 {
   "name": "Benim Uygulamam",
-  "short_name": "Uygulama",
+  "short_name": "Swipe App",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -18,3 +18,4 @@
     }
   ]
 }
+
