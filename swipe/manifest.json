@@ -1,6 +1,6 @@
 {
-  "name": "Benim Uygulamam",
-  "short_name": "Swipe App",
+  "name": "PWA Test",
+  "short_name": "PWA",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -18,4 +18,3 @@
     }
   ]
 }
-
